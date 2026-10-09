@@ -1,0 +1,33 @@
+name: Security posture auditor CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install package and test dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Run tests
+        run: python -m pytest
+      - name: Audit secure Kubernetes sample
+        run: cloud-security-auditor audit k8s --manifests samples/secure --output k8s-report.json --fail-on high
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k8s-security-audit
+          path: k8s-report.json
+          if-no-files-found: ignore

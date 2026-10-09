@@ -1,0 +1,102 @@
+{
+  "account_summary": {
+    "SummaryMap": {
+      "AccountMFAEnabled": 0,
+      "AccountAccessKeysPresent": 1
+    },
+    "Users": [
+      {
+        "UserName": "legacy-admin",
+        "AttachedPolicies": [
+          {
+            "PolicyName": "AdministratorAccess",
+            "PolicyArn": "arn:aws:iam::123456789012:policy/AdministratorAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "*",
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ],
+        "InlinePolicies": []
+      }
+    ],
+    "RootCredentialReport": {
+      "PasswordEnabled": "true",
+      "MfaActive": "false",
+      "access_key_1_active": "true",
+      "access_key_2_active": "false",
+      "last_used_date": "2025-02-01T00:00:00Z"
+    }
+  },
+  "buckets": [
+    {
+      "Name": "public-customer-exports",
+      "Acl": {
+        "Grants": [
+          {
+            "Grantee": {
+              "Type": "Group",
+              "URI": "http://acs.amazonaws.com/groups/global/AllUsers"
+            },
+            "Permission": "READ"
+          }
+        ]
+      },
+      "Policy": {
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::public-customer-exports/*"
+          }
+        ]
+      },
+      "PublicAccessBlock": {
+        "BlockPublicAcls": false,
+        "IgnorePublicAcls": false,
+        "BlockPublicPolicy": false,
+        "RestrictPublicBuckets": false
+      }
+    }
+  ],
+  "security_groups": [
+    {
+      "GroupId": "sg-0123456789abcdef0",
+      "GroupName": "legacy-admin-access",
+      "IpPermissions": [
+        {
+          "IpProtocol": "tcp",
+          "FromPort": 22,
+          "ToPort": 22,
+          "IpRanges": [
+            {
+              "CidrIp": "0.0.0.0/0",
+              "Description": "Temporary access"
+            }
+          ]
+        },
+        {
+          "IpProtocol": "tcp",
+          "FromPort": 3389,
+          "ToPort": 3389,
+          "IpRanges": [{"CidrIp": "198.51.100.0/24"}]
+        }
+      ]
+    }
+  ],
+  "volumes": [
+    {
+      "VolumeId": "vol-0123456789abcdef0",
+      "Encrypted": false,
+      "State": "in-use",
+      "AvailabilityZone": "us-east-1a"
+    }
+  ]
+}

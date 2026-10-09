@@ -1,0 +1,2 @@
+"""AWS configuration security scanner."""
+

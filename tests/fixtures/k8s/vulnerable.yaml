@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vulnerable-api
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vulnerable-api
+  template:
+    metadata:
+      labels:
+        app: vulnerable-api
+    spec:
+      containers:
+        - name: api
+          image: example.invalid/api:latest
+          securityContext:
+            privileged: true
+            runAsUser: 0
+            capabilities:
+              add: ["SYS_ADMIN", "NET_ADMIN", "NET_RAW"]
+          resources:
+            limits:
+              cpu: "1"
+          volumeMounts:
+            - name: host-runtime
+              mountPath: /runtime
+        - name: metrics
+          image: example.invalid/metrics:1
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: host-runtime
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ordinary-pod
+  namespace: production
+spec:
+  containers:
+    - name: app
+      image: example.invalid/app:2
+      resources:
+        limits:
+          cpu: 200m
+          memory: 256Mi
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001

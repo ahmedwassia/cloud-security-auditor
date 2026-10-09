@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ result.platform | upper }} Security Posture Report</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #172033; background: #f3f6fa; }
+    body { margin: 0; padding: 2rem; }
+    main { max-width: 1100px; margin: auto; }
+    .card { background: white; border: 1px solid #dce3ec; border-radius: 12px; padding: 1.4rem; margin: 1rem 0; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+    .metric strong { display: block; font-size: 1.8rem; margin-top: .35rem; }
+    .muted { color: #58677d; }
+    .bar { height: 12px; border-radius: 8px; background: #e7edf4; overflow: hidden; }
+    .bar span { display: block; height: 100%; background: #138a63; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: .8rem; border-bottom: 1px solid #e6ebf1; text-align: left; vertical-align: top; }
+    .Critical { color: #a41520; font-weight: 700; }
+    .High { color: #bd4a0a; font-weight: 700; }
+    .Medium { color: #8a6700; font-weight: 700; }
+    .Low { color: #32658b; font-weight: 700; }
+    code { overflow-wrap: anywhere; }
+    @media (max-width: 700px) { body { padding: .75rem; } .table-wrap { overflow-x: auto; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>{{ result.platform | upper }} Security Posture Report</h1>
+  <p class="muted">Generated {{ result.generated_at }} · {{ result.resources_scanned }} resources scanned</p>
+  <section class="card metrics" aria-label="Audit summary">
+    <div class="metric">Scoped CIS compliance<strong>{% if data.compliance.percentage is not none %}{{ data.compliance.percentage }}%{% else %}N/A{% endif %}</strong></div>
+    <div class="metric">Findings<strong>{{ data.summary.findings }}</strong></div>
+    {% for severity, count in data.summary.by_severity.items() %}
+    <div class="metric">{{ severity }}<strong>{{ count }}</strong></div>
+    {% endfor %}
+  </section>
+  <section class="card">
+    <h2>{{ data.compliance.benchmark }}</h2>
+    <p>{{ data.compliance.controls_passed }} of {{ data.compliance.controls_evaluated }} mapped controls passed.</p>
+    <div class="bar" role="img" aria-label="{% if data.compliance.percentage is not none %}CIS compliance {{ data.compliance.percentage }} percent{% else %}CIS compliance unavailable{% endif %}">
+      <span style="width: {{ data.compliance.percentage if data.compliance.percentage is not none else 0 }}%"></span>
+    </div>
+    <p class="muted">{{ data.compliance.scope_note }}</p>
+  </section>
+  <section class="card">
+    <h2>Findings</h2>
+    {% if result.findings %}
+    <div class="table-wrap"><table>
+      <thead><tr><th>Severity</th><th>Resource</th><th>Finding</th><th>CIS control</th><th>Remediation</th></tr></thead>
+      <tbody>
+      {% for finding in result.findings %}
+      <tr>
+        <td class="{{ finding.severity.value }}">{{ finding.severity.value }}</td>
+        <td><code>{{ finding.resource }}</code></td>
+        <td><strong>{{ finding.title }}</strong><br>{{ finding.description }}</td>
+        <td>{% if finding.cis_controls %}{{ finding.cis_controls | join("; ") }}{% else %}<span class="muted">Not mapped</span>{% endif %}</td>
+        <td>{{ finding.remediation }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}<p>No findings detected.</p>{% endif %}
+  </section>
+  {% if result.errors %}
+  <section class="card"><h2>Collection errors</h2><ul>{% for error in result.errors %}<li>{{ error }}</li>{% endfor %}</ul></section>
+  {% endif %}
+</main>
+</body>
+</html>

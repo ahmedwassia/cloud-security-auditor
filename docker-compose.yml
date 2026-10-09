@@ -1,0 +1,10 @@
+services:
+  audit:
+    build: .
+    command:
+      - audit
+      - k8s
+      - --manifests
+      - /app/samples/secure
+      - --fail-on
+      - high
